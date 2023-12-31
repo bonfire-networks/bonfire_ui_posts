@@ -1,11 +1,9 @@
-# Bonfire.UI.Social
+# Bonfire.UI.Posts
 ![](https://i.imgur.com/XoQvDCW.png)
 
-[Bonfire.UI.Social](http://bonfirenetworks.org/extensions/ui_social.html) is an extension that includes the main User Interfaces (routes, pages and components) required to have a fully working federated social network app.
+`Bonfire.UI.Posts` is an extension that includes some User Interfaces (routes, pages and components) for writing and reading posts in Bonfire.
 
-This extension is meant to be used by other extensions like [Bonfire.Social](https://github.com/bonfire-networks/bonfire_social), which provides logic for the UI to work with/
-
-You can customise it by forking, but we recommend creating an extension which uses this one as a dependency, and defines your custom components, views, and/or routes (you can then comment `Bonfire.UI.Social.Routes` from your top-level Router to use your custom routes and views instead).
+You can customise it by forking, but we recommend creating an extension which uses this one as a dependency, and defines your custom components, views, and/or routes (you can then comment `Bonfire.UI.Posts.Routes` from your top-level Router to use your custom routes and views instead).
 
 
 ### Stack
