@@ -14,6 +14,8 @@ defmodule Bonfire.UI.Posts.PostLive do
        page: "discussion",
        #  to_circles: [],
        participants: nil,
+       nav_items: Bonfire.Common.ExtensionModule.default_nav(),
+
        #  smart_input_opts: %{prompt: l("Reply")},
        activity: nil,
        back: true,
