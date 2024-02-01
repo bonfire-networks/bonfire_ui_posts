@@ -14,6 +14,7 @@ defmodule Bonfire.UI.Posts.ProfilePostsLive do
   prop follows_me, :boolean, default: false
   prop loading, :boolean, default: false
   prop feed_component_id, :any, default: nil
+  prop hide_tabs, :boolean, default: false
 
   slot header
 end
