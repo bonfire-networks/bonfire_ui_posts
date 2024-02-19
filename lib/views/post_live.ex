@@ -6,14 +6,16 @@ defmodule Bonfire.UI.Posts.PostLive do
   on_mount {LivePlugs, [Bonfire.UI.Me.LivePlugs.LoadCurrentUser]}
 
   def mount(params, _session, socket) do
+    is_guest? = is_nil(current_user_id(socket.assigns))
+
     {:ok,
      socket
      |> assign(
        page_title: l("Post"),
-       is_guest?: is_nil(current_user_id(socket.assigns)),
-       without_sidebar: is_nil(current_user_id(socket.assigns)),
-       without_secondary_widgets: is_nil(current_user_id(socket.assigns)),
-       no_header: is_nil(current_user_id(socket.assigns)),
+       is_guest?: is_guest?,
+       without_sidebar: is_guest?,
+       without_secondary_widgets: is_guest?,
+       no_header: is_guest?,
        thread_title: nil,
        page: "discussion",
        #  to_circles: [],
