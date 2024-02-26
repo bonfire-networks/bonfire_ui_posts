@@ -48,7 +48,7 @@ defmodule Bonfire.UI.Posts.PostLive do
      )}
   end
 
-  def do_handle_params(%{"id" => id} = params, _url, socket) do
+  def handle_params(%{"id" => id} = params, _url, socket) do
     socket =
       socket
       |> assign(
@@ -72,36 +72,9 @@ defmodule Bonfire.UI.Posts.PostLive do
     end
   end
 
-  def do_handle_params(_params, _url, socket) do
+  def handle_params(_params, _url, socket) do
     {:noreply,
      socket
      |> redirect_to(path(:write))}
   end
-
-  def handle_params(params, uri, socket),
-    do:
-      Bonfire.UI.Common.LiveHandlers.handle_params(
-        params,
-        uri,
-        socket,
-        __MODULE__,
-        &do_handle_params/3
-      )
-
-  def handle_info(info, socket),
-    do: Bonfire.UI.Common.LiveHandlers.handle_info(info, socket, __MODULE__)
-
-  def handle_event(
-        action,
-        attrs,
-        socket
-      ),
-      do:
-        Bonfire.UI.Common.LiveHandlers.handle_event(
-          action,
-          attrs,
-          socket,
-          __MODULE__
-          # &do_handle_event/3
-        )
 end
