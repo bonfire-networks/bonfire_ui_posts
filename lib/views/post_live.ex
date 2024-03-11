@@ -12,10 +12,10 @@ defmodule Bonfire.UI.Posts.PostLive do
      socket
      |> assign(
        page_title: l("Post"),
-       is_guest?: is_guest?,
-       without_sidebar: is_guest?,
-       without_secondary_widgets: is_guest?,
-       no_header: is_guest?,
+       #  is_guest?: is_guest?,
+       #  without_sidebar: is_guest?,
+       #  without_secondary_widgets: is_guest?,
+       #  no_header: is_guest?,
        thread_title: nil,
        page: "discussion",
        #  to_circles: [],
