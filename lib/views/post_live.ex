@@ -3,6 +3,12 @@ defmodule Bonfire.UI.Posts.PostLive do
 
   # import Untangle
 
+  declare_extension("UI for posts",
+    icon: "icomoon-free:blog",
+    emoji: "📝",
+    description: l("User interface for writing and reading posts.")
+  )
+
   on_mount {LivePlugs, [Bonfire.UI.Me.LivePlugs.LoadCurrentUser]}
 
   def mount(params, _session, socket) do
