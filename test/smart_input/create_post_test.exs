@@ -18,7 +18,7 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
     {:ok, view, _html} = live(conn, "/write")
 
     file = Path.expand("../fixtures/icon.png", __DIR__)
-    open_browser(view)
+    # open_browser(view)
 
     icon =
       file_input(view, "#smart_input_form", :files, [
@@ -44,7 +44,7 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
 
     assert [ok] = find_flash(posted)
     {:ok, refreshed_view, _html} = live(conn, "/feed/local")
-    open_browser(refreshed_view)
+    # open_browser(refreshed_view)
   end
 
   describe "create a post" do
@@ -162,7 +162,7 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
                |> element("[data-id=action_reply]")
                |> render_click()
 
-      open_browser(view)
+      # open_browser(view)
 
       assert view
              |> form("#smart_input form")
