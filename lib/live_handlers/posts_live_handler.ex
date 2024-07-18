@@ -97,7 +97,7 @@ defmodule Bonfire.Posts.LiveHandler do
     end
   end
 
-  def handle_event("edit", %{"id" => id} = attrs, socket) do
+  def handle_event("edit", %{"post_id" => id} = attrs, socket) do
     current_user = current_user_required!(socket)
 
     with {:ok, updated} <- Bonfire.Social.PostContents.edit(current_user, id, attrs) do
