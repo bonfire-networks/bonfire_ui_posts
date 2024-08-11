@@ -70,6 +70,7 @@ defmodule Bonfire.UI.Posts.PostLive do
       {:noreply, socket}
     else
       {:error, e} ->
+        warn(e)
         {:noreply, assign_error(socket, e)}
 
       other ->
