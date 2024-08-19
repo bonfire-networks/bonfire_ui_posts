@@ -29,7 +29,8 @@ defmodule Bonfire.Posts.LiveHandler do
          uploaded_media <- live_upload_files(current_user, params["upload_metadata"], socket),
          opts <-
            [
-             current_user: current_user,
+             #  current_user: current_user,
+             context: socket.assigns[:__context__] || current_user,
              post_attrs:
                Bonfire.Posts.prepare_post_attrs(attrs)
                |> Map.put(:uploaded_media, uploaded_media),
