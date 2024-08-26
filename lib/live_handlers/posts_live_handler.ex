@@ -107,7 +107,7 @@ defmodule Bonfire.Posts.LiveHandler do
 
       {:noreply,
        socket
-       |> update(:object, &Map.put(&1 || %{}, :post_content, updated))
+       |> assign(:object, Map.put(socket.assigns[:object] || %{}, :post_content, updated))
        |> assign_flash(:info, l("Edited!"))}
     else
       {:ok, :no_changes} ->
