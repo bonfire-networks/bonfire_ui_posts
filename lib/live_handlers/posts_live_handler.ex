@@ -51,14 +51,14 @@ defmodule Bonfire.Posts.LiveHandler do
           if is_struct(thread) do
             path(thread)
           else
-            "/discussion/#{ulid(thread)}"
+            "/discussion/#{uid(thread)}"
           end
         else
           nil
         end
 
       permalink =
-        if thread_url && ulid(thread) != activity.object.id,
+        if thread_url && uid(thread) != activity.object.id,
           do: "#{thread_url}#activity-#{activity.object.id}",
           else: "#{path(activity.object)}#"
 
