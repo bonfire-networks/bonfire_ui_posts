@@ -22,7 +22,7 @@ defmodule Bonfire.Posts.LiveHandler do
       params
       |> input_to_atoms()
 
-    # debug(e(socket.assigns, :showing_within, nil), "SHOWING")
+    # debug(e(assigns(socket), :showing_within, nil), "SHOWING")
     current_user = current_user_required!(socket)
 
     with %{valid?: true} <- post_changeset(attrs, current_user),
@@ -30,7 +30,7 @@ defmodule Bonfire.Posts.LiveHandler do
          opts <-
            [
              #  current_user: current_user,
-             context: socket.assigns[:__context__] || current_user,
+             context: assigns(socket)[:__context__] || current_user,
              post_attrs:
                Bonfire.Posts.prepare_post_attrs(attrs)
                |> Map.put(:uploaded_media, uploaded_media),
@@ -75,7 +75,7 @@ defmodule Bonfire.Posts.LiveHandler do
         # |> patch_to(current_url(socket), fallback: path(published)) # so the flash appears - TODO: causes a conflict between the activity coming in via pubsub
 
         # assign_generic(socket,
-        #   feed: [%{published.activity | object_post: published.post, subject_user: current_user_required!(socket)}] ++ Map.get(socket.assigns, :feed, [])
+        #   feed: [%{published.activity | object_post: published.post, subject_user: current_user_required!(socket)}] ++ Map.get(assigns(socket), :feed, [])
         # )
       }
 
@@ -107,7 +107,7 @@ defmodule Bonfire.Posts.LiveHandler do
 
       {:noreply,
        socket
-       |> assign(:object, Map.put(socket.assigns[:object] || %{}, :post_content, updated))
+       |> assign(:object, Map.put(assigns(socket)[:object] || %{}, :post_content, updated))
        |> assign_flash(:info, l("Edited!"))}
     else
       {:ok, :no_changes} ->
@@ -126,7 +126,7 @@ defmodule Bonfire.Posts.LiveHandler do
   # end
 
   def handle_event("write_error", _, socket) do
-    Bonfire.UI.Common.NotificationLive.error_template(socket.assigns)
+    Bonfire.UI.Common.NotificationLive.error_template(assigns(socket))
     |> write_feedback(socket)
   end
 
