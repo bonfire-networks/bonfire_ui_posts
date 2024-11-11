@@ -22,8 +22,13 @@ defmodule Bonfire.Posts.LiveHandler do
 
     attrs =
       params
-      |> input_to_atoms()
-      |> debug("post_attrs")
+      |> input_to_atoms(
+        discard_unknown_keys: false,
+        also_discard_unknown_nested_keys: false,
+        force: false,
+        including_values: false
+      )
+      |> debug("post_attrssss")
 
     # debug(e(assigns(socket), :showing_within, nil), "SHOWING")
     current_user = current_user_required!(socket)
