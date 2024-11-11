@@ -18,9 +18,12 @@ defmodule Bonfire.Posts.LiveHandler do
 
   # if not a message, it's a post by default
   def handle_event("post", params, socket) do
+    debug(params, "post_paramssss")
+
     attrs =
       params
       |> input_to_atoms()
+      |> debug("post_attrs")
 
     # debug(e(assigns(socket), :showing_within, nil), "SHOWING")
     current_user = current_user_required!(socket)
