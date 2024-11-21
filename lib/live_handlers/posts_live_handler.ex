@@ -19,9 +19,12 @@ defmodule Bonfire.Posts.LiveHandler do
   # if not a message, it's a post by default
   def handle_event("post", params, socket) do
     debug(params, "post_paramssss")
+    upload_metadata = params["upload_metadata"]
 
     attrs =
       params
+      # Remove upload_metadata before conversion
+      |> Map.delete("upload_metadata")
       |> input_to_atoms(
         discard_unknown_keys: false,
         also_discard_unknown_nested_keys: false,
@@ -34,7 +37,7 @@ defmodule Bonfire.Posts.LiveHandler do
     current_user = current_user_required!(socket)
 
     with %{valid?: true} <- post_changeset(attrs, current_user),
-         uploaded_media <- live_upload_files(current_user, params["upload_metadata"], socket),
+         uploaded_media <- live_upload_files(current_user, upload_metadata, socket),
          opts <-
            [
              #  current_user: current_user,
