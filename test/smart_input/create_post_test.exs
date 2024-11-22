@@ -74,6 +74,7 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
       # |> Floki.text() =~ "Posted"
 
       live_pubsub_wait(view)
+      open_browser(view)
       assert [ok] = find_flash(posted)
       assert ok |> Floki.text() =~ "Posted"
     end
