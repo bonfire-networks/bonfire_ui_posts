@@ -16,7 +16,7 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
     # login as alice
     conn = conn(user: alice, account: account)
     {:ok, view, _html} = live(conn, "/write")
-
+    # view = Phoenix.LiveViewTest.allow_upload(view, :files, accept: :any, max_entries: 10)
     file = Path.expand("../fixtures/icon.png", __DIR__)
     # open_browser(view)
 
@@ -56,7 +56,7 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
 
       conn = conn(user: someone, account: some_account)
 
-      next = "/settings"
+      next = "/dashboard"
       {:ok, view, _html} = live(conn, next)
       # open_browser(view)
 
@@ -73,10 +73,11 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
 
       # |> Floki.text() =~ "Posted"
 
-      live_pubsub_wait(view)
-      open_browser(view)
-      assert [ok] = find_flash(posted)
-      assert ok |> Floki.text() =~ "Posted"
+      # live_pubsub_wait(view)
+      # open_browser(view)
+      # assert [ok] = find_flash(posted)
+      assert has_element?(view, "[role=alert]", "Posted")
+      # assert view |> Floki.text() =~ "Posted"
     end
 
     test "shows up on my profile timeline" do
