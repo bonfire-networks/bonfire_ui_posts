@@ -70,8 +70,15 @@ defmodule Bonfire.UI.Posts.PostLive do
            Bonfire.Social.Objects.LiveHandler.load_object_assigns(socket) do
       {:noreply, socket}
     else
+      {:error, :not_found} ->
+        error(id, "Post not found")
+        {:error, :not_found}
+
+      #   {:noreply, socket
+      #   |> assign(:object, :not_found)}
+
       {:error, e} ->
-        warn(e)
+        error(e)
         {:noreply, assign_error(socket, e)}
 
       other ->
