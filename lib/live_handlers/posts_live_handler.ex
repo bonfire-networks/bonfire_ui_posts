@@ -9,11 +9,11 @@ defmodule Bonfire.Posts.LiveHandler do
   # alias Ecto.Changeset
 
   def handle_event("post", %{"create_object_type" => "message"} = params, socket) do
-    Bonfire.Messages.LiveHandler.send_message(params, socket)
+    maybe_apply(Bonfire.Messages.LiveHandler, :send_message, [params, socket])
   end
 
   def handle_event("post", %{"post" => %{"create_object_type" => "message"}} = params, socket) do
-    Bonfire.Messages.LiveHandler.send_message(params, socket)
+    maybe_apply(Bonfire.Messages.LiveHandler, :send_message, [params, socket])
   end
 
   # if not a message, it's a post by default
