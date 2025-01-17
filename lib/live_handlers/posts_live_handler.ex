@@ -78,7 +78,7 @@ defmodule Bonfire.Posts.LiveHandler do
         socket
         |> assign_flash(
           :info,
-          "<div class='flex justify-between items-center'> <span>#{l("Posted!")} </span><a href='#{permalink}' class='btn-outline btn btn-sm'>#{l("Show")}</a></div>"
+          "<div class='flex justify-between items-center'> <span>#{l("Posted!")} </span><a href='#{permalink}' class='btn-soft btn-secondary btn btn-sm'>#{l("Show")}</a></div>"
         )
         # |> Bonfire.UI.Common.SmartInput.LiveHandler.close_smart_input()
         |> push_event("smart_input:reset", %{})
