@@ -15,7 +15,7 @@
       selected_tab={@selected_tab}
       feed_title={@feed_title}
       loading={@loading}
-      hide_tabs
+      hide_filters
     >
       <:bottom_or_empty_feed>
         <a
