@@ -61,7 +61,7 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
       # open_browser(view)
 
       # wait for persistent smart input to be ready
-      live_pubsub_wait(view)
+      live_async_wait(view)
 
       assert posted =
                view
@@ -73,7 +73,7 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
 
       # |> Floki.text() =~ "Posted"
 
-      # live_pubsub_wait(view)
+      # live_async_wait(view)
       # open_browser(view)
       # assert [ok] = find_flash(posted)
       assert has_element?(view, "[role=alert]", "Posted")
@@ -92,7 +92,7 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
       # |> IO.inspect
       {:ok, view, _html} = live(conn, next)
       # open_browser(view)
-      live_pubsub_wait(view)
+      live_async_wait(view)
 
       assert posted =
                view
@@ -128,7 +128,7 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
              })
 
       # check if post appears instantly on home feed (with pubsub)
-      live_pubsub_wait(view)
+      live_async_wait(view)
 
       assert has_element?(view, "[data-id=feed]", content)
     end
@@ -157,7 +157,7 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
       next = "/post/#{id(op)}"
       # |> IO.inspect
       {:ok, view, _html} = live(conn, next)
-      live_pubsub_wait(view)
+      live_async_wait(view)
 
       assert _click =
                view
