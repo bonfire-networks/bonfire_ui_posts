@@ -171,7 +171,11 @@ defmodule Bonfire.Posts.LiveHandler do
   def handle_event("input", %{"circles" => selected_circles} = _attrs, socket)
       when is_list(selected_circles) and selected_circles != [] do
     {:noreply,
-     Bonfire.Boundaries.LiveHandler.set_circles_tuples(:to_circles, selected_circles, socket)}
+     Bonfire.Boundaries.Circles.LiveHandler.set_circles_tuples(
+       :to_circles,
+       selected_circles,
+       socket
+     )}
   end
 
   # no circle
