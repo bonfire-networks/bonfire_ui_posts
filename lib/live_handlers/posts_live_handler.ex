@@ -76,13 +76,14 @@ defmodule Bonfire.Posts.LiveHandler do
       {
         :noreply,
         socket
-        |> assign_flash(
-          :info,
-          "<div class='flex justify-between items-center'> <span>#{l("Posted!")} </span><a href='#{permalink}' class='btn-soft btn-secondary btn btn-sm'>#{l("Show")}</a></div>"
-        )
+
         # |> Bonfire.UI.Common.SmartInput.LiveHandler.close_smart_input()
         |> push_event("smart_input:reset", %{})
         |> Bonfire.UI.Common.SmartInput.LiveHandler.reset_input()
+        |> assign_flash(
+          :info,
+          "<div class='flex justify-between items-center'> <span>#{l("Posted!")} </span><a href='#{permalink}' class='btn-active btn btn-sm'>#{l("Show")}</a></div>"
+        )
         # |> patch_to(current_url(socket), fallback: path(published)) # so the flash appears - TODO: causes a conflict between the activity coming in via pubsub
 
         # assign_generic(socket,

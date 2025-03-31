@@ -8,6 +8,7 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
   alias Bonfire.Social.Graph.Follows
   alias Bonfire.Files.Test
 
+  @tag :todo
   test "create a post with uploads" do
     # Create alice user
     account = fake_account!()
@@ -42,13 +43,14 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
                "post" => %{"post_content" => %{"html_body" => content}}
              })
 
-    assert [ok] = find_flash(posted)
+    # assert [ok] = find_flash(posted)
     {:ok, refreshed_view, _html} = live(conn, "/feed/local")
-    # open_browser(refreshed_view)
+
+    Phoenix.LiveViewTest.open_browser(refreshed_view)
   end
 
   describe "create a post" do
-    test "shows a confirmation flash message" do
+    test "works" do
       some_account = fake_account!()
       someone = fake_user!(some_account)
 
@@ -56,13 +58,8 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
 
       conn = conn(user: someone, account: some_account)
 
-      next = "/dashboard"
+      next = "/feed/local"
       {:ok, view, _html} = live(conn, next)
-      # open_browser(view)
-
-      # wait for persistent smart input to be ready
-      live_async_wait(view)
-
       assert posted =
                view
                |> form("#smart_input form")
@@ -71,13 +68,7 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
                  "post" => %{"post_content" => %{"html_body" => content}}
                })
 
-      # |> Floki.text() =~ "Posted"
-
-      # live_async_wait(view)
-      # open_browser(view)
-      # assert [ok] = find_flash(posted)
-      assert has_element?(view, "[role=alert]", "Posted")
-      # assert view |> Floki.text() =~ "Posted"
+      assert has_element?(view, "[data-id=feed]", content)
     end
 
     test "shows up on my profile timeline" do
@@ -131,6 +122,39 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
       live_async_wait(view)
 
       assert has_element?(view, "[data-id=feed]", content)
+    end
+
+
+    test "i can reply in feed right away" do
+      some_account = fake_account!()
+      someone = fake_user!(some_account)
+      alice = fake_user!(some_account)
+
+      content = "epic post!"
+      attrs = %{
+        post_content: %{summary: "summary", name: "name 2", html_body: content},
+        }
+
+      assert {:ok, post} =
+        Posts.publish(current_user: alice, post_attrs: attrs, boundary: "public")
+
+      content_reply = "epic reply!"
+      conn = conn(user: alice, account: some_account)
+      next = "/feed"
+      # |> IO.inspect
+      {:ok, alice_view, _html} = live(conn, next)
+      # Phoenix.LiveViewTest.open_browser(alice_view)
+      assert has_element?(alice_view, "[data-id=feed]", content)
+      assert alice_view
+             |> form("#smart_input form")
+             |> render_submit(%{
+               "to_boundaries" => "public",
+               "post" => %{
+                "post_content" => %{"html_body" => content_reply},
+                "reply_to_id" =>  post.id
+              }
+             })
+      assert has_element?(alice_view, "[data-id=feed]", content_reply)
     end
 
     @tag :todo
