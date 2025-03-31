@@ -60,6 +60,7 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
 
       next = "/feed/local"
       {:ok, view, _html} = live(conn, next)
+
       assert posted =
                view
                |> form("#smart_input form")
@@ -124,19 +125,19 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
       assert has_element?(view, "[data-id=feed]", content)
     end
 
-
     test "i can reply in feed right away" do
       some_account = fake_account!()
       someone = fake_user!(some_account)
       alice = fake_user!(some_account)
 
       content = "epic post!"
+
       attrs = %{
-        post_content: %{summary: "summary", name: "name 2", html_body: content},
-        }
+        post_content: %{summary: "summary", name: "name 2", html_body: content}
+      }
 
       assert {:ok, post} =
-        Posts.publish(current_user: alice, post_attrs: attrs, boundary: "public")
+               Posts.publish(current_user: alice, post_attrs: attrs, boundary: "public")
 
       content_reply = "epic reply!"
       conn = conn(user: alice, account: some_account)
@@ -145,15 +146,17 @@ defmodule Bonfire.Social.Activities.CreatePost.Test do
       {:ok, alice_view, _html} = live(conn, next)
       # Phoenix.LiveViewTest.open_browser(alice_view)
       assert has_element?(alice_view, "[data-id=feed]", content)
+
       assert alice_view
              |> form("#smart_input form")
              |> render_submit(%{
                "to_boundaries" => "public",
                "post" => %{
-                "post_content" => %{"html_body" => content_reply},
-                "reply_to_id" =>  post.id
-              }
+                 "post_content" => %{"html_body" => content_reply},
+                 "reply_to_id" => post.id
+               }
              })
+
       assert has_element?(alice_view, "[data-id=feed]", content_reply)
     end
 
