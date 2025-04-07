@@ -47,8 +47,17 @@ defmodule Bonfire.UI.Posts.PostLive do
        #  without_sidebar: true,
        post_id: nil,
        thread_id: nil,
-       #  reply_to_id: nil,
-       thread_mode: maybe_to_atom(e(params, "mode", nil)),
+       page_info: nil,
+       replies: nil,
+       threaded_replies: nil,
+       thread_mode:
+         (maybe_to_atom(e(params, "mode", nil)) ||
+            Settings.get(
+              [Bonfire.UI.Social.ThreadLive, :thread_mode],
+              nil,
+              assigns(socket)[:__context__]
+            ) || :nested)
+         |> debug("thread mode"),
        search_placeholder: nil,
        #  to_boundaries: nil,
        loading: false
