@@ -22,7 +22,7 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
     |> upload("files", "test/fixtures/icon.png")
     |> click_button("Publish")
     |> visit("/feed/local")
-    |> assert_has("[data-id=feed]", text: "here is an epic html post")
+    |> assert_has("[data-id=feed] article", text: "here is an epic html post")
   end
 
   describe "create a post" do
@@ -37,7 +37,8 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
       |> visit("/feed/local")
       |> fill_in("#editor_hidden_input", "Content", with: content)
       |> click_button("Publish")
-      |> assert_has("[data-id=feed]", text: content)
+      |> wait_async()
+      |> assert_has_or_open_browser("[data-id=feed] article", text: content)
     end
 
     test "shows up on my profile timeline" do
@@ -52,7 +53,7 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
       |> fill_in("#editor_hidden_input", "Content", with: content)
       |> click_button("Publish")
       |> visit("/user")
-      |> assert_has("[data-id=feed]", text: content)
+      |> assert_has("[data-id=feed] article", text: content)
     end
 
     test "shows up in feed right away" do
@@ -66,7 +67,8 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
       |> visit("/feed")
       |> fill_in("#editor_hidden_input", "Content", with: content)
       |> click_button("Publish")
-      |> assert_has("[data-id=feed]", text: content)
+      |> wait_async()
+      |> assert_has_or_open_browser("[data-id=feed]", text: content)
     end
 
     test "i can reply in feed right away" do
@@ -86,11 +88,11 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
 
       conn
       |> visit("/feed")
-      |> assert_has("#feed_my", text: content)
+      |> assert_has("#feed_my article", text: content)
       |> fill_in("#editor_hidden_input", "Content", with: content_reply)
       |> click_button("Publish")
-      |> PhoenixTest.open_browser()
-      |> assert_has("#feed_my", text: content_reply)
+      |> wait_async()
+      |> assert_has_or_open_browser("#feed_my article", text: content_reply)
     end
 
     @tag :todo
@@ -121,7 +123,7 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
 
       alice_conn
       |> visit("/@#{bob.character.username}")
-      |> assert_has("[data-id=feed]", text: content)
+      |> assert_has("[data-id=feed] article", text: content)
     end
   end
 end
