@@ -4,7 +4,6 @@ defmodule Bonfire.Posts.LiveHandler do
   use Bonfire.Common.Utils
   alias Bonfire.Posts
   # alias Bonfire.Social.PostContents
-  # alias Bonfire.Data.Social.PostContent
   # alias Bonfire.Data.Social.Post
   # alias Ecto.Changeset
 
