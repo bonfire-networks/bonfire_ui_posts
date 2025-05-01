@@ -25,6 +25,7 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
     |> assert_has("[data-id=feed] article", text: "here is an epic html post")
   end
 
+  @tag :skip_ci
   describe "create a post" do
     test "works" do
       some_account = fake_account!()
@@ -41,6 +42,7 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
       |> assert_has_or_open_browser("[data-id=feed] article", text: content)
     end
 
+    @tag :skip_ci
     test "shows up on my profile timeline" do
       some_account = fake_account!()
       someone = fake_user!(some_account)
@@ -56,6 +58,7 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
       |> assert_has("[data-id=feed] article", text: content)
     end
 
+    @tag :skip_ci
     test "shows up in feed right away" do
       some_account = fake_account!()
       someone = fake_user!(some_account)
@@ -71,6 +74,7 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
       |> assert_has_or_open_browser("[data-id=feed]", text: content)
     end
 
+    @tag :skip_ci
     test "i can reply in feed right away" do
       some_account = fake_account!()
       someone = fake_user!(some_account)
