@@ -33,6 +33,8 @@ defmodule Bonfire.UI.Posts.ConnCase do
       import Bonfire.UI.Posts.Test.ConnHelpers
       import Bonfire.UI.Posts.Test.FakeHelpers
 
+      use Bonfire.Common.Config
+      use Bonfire.Common.Settings
       import Untangle
       use Arrows
       # alias Bonfire.UI.Posts.Router.Helpers, as: Routes
