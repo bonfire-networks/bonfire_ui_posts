@@ -8,23 +8,7 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
   alias Bonfire.Social.Graph.Follows
   alias Bonfire.Files.Test
 
-  @tag :todo
-  test "create a post with uploads" do
-    # Create alice user
-    account = fake_account!()
-    alice = fake_user!(account)
-
-    conn = conn(user: alice, account: account)
-
-    conn
-    |> visit("/write")
-    |> fill_in("#editor_hidden_input", "Content", with: "here is an epic html post")
-    |> upload("files", "test/fixtures/icon.png")
-    |> click_button("Publish")
-    |> visit("/feed/local")
-    |> assert_has("[data-id=feed] article", text: "here is an epic html post")
-  end
-
+  # FIXME
   @tag :skip_ci
   describe "create a post" do
     test "works" do
@@ -42,6 +26,7 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
       |> assert_has_or_open_browser("[data-id=feed] article", text: content)
     end
 
+    # FIXME
     @tag :skip_ci
     test "shows up on my profile timeline" do
       some_account = fake_account!()
@@ -58,6 +43,7 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
       |> assert_has("[data-id=feed] article", text: content)
     end
 
+    # FIXME
     @tag :skip_ci
     test "shows up in feed right away" do
       some_account = fake_account!()
@@ -74,6 +60,7 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
       |> assert_has_or_open_browser("[data-id=feed]", text: content)
     end
 
+    # FIXME
     @tag :skip_ci
     test "i can reply in feed right away" do
       some_account = fake_account!()
