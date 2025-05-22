@@ -64,6 +64,25 @@ defmodule Bonfire.UI.Posts.PostLive do
      )}
   end
 
+  def handle_params(%{"id" => "comment_" <> comment_id} = params, _url, socket)
+      when is_binary(comment_id) do
+    debug(comment_id, "comment_id that needs redirection")
+
+    # Try to find the thread_id for this comment (optimized query)
+    current_user = current_user(socket)
+
+    with thread_id when is_binary(thread_id) <-
+           Bonfire.Social.Threads.fetch_thread_id(comment_id, current_user: current_user) do
+      redirect_to_thread_comment(socket, thread_id, comment_id)
+    else
+      error ->
+        debug(error, "Could not find thread for comment")
+
+        {:noreply,
+         assign_error(socket, l("Comment not found or you don't have permission to view it"))}
+    end
+  end
+
   def handle_params(%{"id" => id} = params, _url, socket) do
     socket =
       socket
@@ -100,5 +119,15 @@ defmodule Bonfire.UI.Posts.PostLive do
     {:noreply,
      socket
      |> redirect_to(path(:write))}
+  end
+
+  defp redirect_to_thread_comment(socket, thread_id, comment_id) do
+    debug(thread_id, "redirecting to thread")
+
+    redirect_path = "/discussion/#{thread_id}#comment_#{comment_id}"
+
+    {:noreply,
+     socket
+     |> redirect_to(redirect_path)}
   end
 end
