@@ -11,7 +11,7 @@ defmodule Bonfire.UI.Posts.ProfilePostsLive do
   prop feed_title, :string, default: nil
   prop feed, :list, default: nil
   prop page_info, :any, default: nil
-  # prop follows_me, :boolean, default: false
+  # prop follows_me, :atom, default: false
   prop loading, :boolean, default: true
   prop feed_component_id, :any, default: nil
   prop hide_filters, :boolean, default: false
