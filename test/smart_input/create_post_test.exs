@@ -69,7 +69,7 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
       content = "epic post!"
 
       attrs = %{
-        post_content: %{summary: "summary", name: "name 2", html_body: content}
+        post_content: %{summary: "summary", html_body: content}
       }
 
       {:ok, post} = Posts.publish(current_user: alice, post_attrs: attrs, boundary: "public")
@@ -94,7 +94,6 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
       attrs = %{
         post_content: %{
           summary: "summary",
-          name: "test post name",
           html_body: "@#{bob.character.username} first post</p>"
         }
       }
