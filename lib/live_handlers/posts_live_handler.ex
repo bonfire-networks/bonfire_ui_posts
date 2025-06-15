@@ -55,6 +55,7 @@ defmodule Bonfire.Posts.LiveHandler do
 
       activity = e(published, :activity, nil)
       thread = e(activity, :replied, :thread, nil) || e(activity, :replied, :thread_id, nil)
+      object_id = e(activity, :object_id, nil) || e(activity, :object, :id, nil)
 
       thread_url =
         if thread do
@@ -68,9 +69,9 @@ defmodule Bonfire.Posts.LiveHandler do
         end
 
       permalink =
-        if thread_url && uid(thread) != activity.object.id,
-          do: "#{thread_url}#activity-#{activity.object.id}",
-          else: "#{path(activity.object)}#"
+        if thread_url && uid(thread) != object_id,
+          do: "#{thread_url}#activity-#{object_id}",
+          else: "#{path(e(activity, :object, nil) || activity)}#"
 
       {
         :noreply,
