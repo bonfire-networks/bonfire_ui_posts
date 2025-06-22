@@ -24,10 +24,10 @@ defmodule Bonfire.UI.Posts.RuntimeConfig do
       ],
       profile: [
         sections: [
-          posts: Bonfire.UI.Posts.ProfilePostsLive
+          # posts: Bonfire.UI.Posts.ProfilePostsLive
         ],
         navigation: [
-          posts: l("Posts")
+          # posts: l("Posts")
         ],
         widgets: []
       ]
