@@ -83,35 +83,45 @@ defmodule Bonfire.UI.Posts.PostLive do
     end
   end
 
-  def handle_params(%{"id" => id} = params, _url, socket) do
-    socket =
-      socket
-      |> assign(
-        params: params,
-        post_id: id,
-        thread_id: id
-        #  url: url
-        #  reply_to_id: e(params, "reply_to_id", id)
-      )
+  def handle_params(%{"id" => request_id} = params, _url, socket) do
+    # Strip .md suffix if present - TOOD: do same for RSS
+    id = String.replace_suffix(request_id, ".md", "")
 
-    with %Phoenix.LiveView.Socket{} = socket <-
-           Bonfire.Social.Objects.LiveHandler.load_object_assigns(socket) do
-      {:noreply, socket}
+    # Check if requesting markdown format
+    if id != request_id or accepts_markdown?(socket) do
+      {:noreply, redirect_to(socket, "/post/markdown/#{id}")}
     else
-      {:error, :not_found} ->
-        error(id, "Post not found")
-        {:error, :not_found}
+      # render the HTML view as usual
 
-      #   {:noreply, socket
-      #   |> assign(:object, :not_found)}
+      socket =
+        socket
+        |> assign(
+          params: params,
+          post_id: id,
+          thread_id: id
+          #  url: url
+          #  reply_to_id: e(params, "reply_to_id", id)
+        )
 
-      {:error, e} ->
-        error(e)
-        {:noreply, assign_error(socket, e)}
-
-      other ->
-        error(other)
+      with %Phoenix.LiveView.Socket{} = socket <-
+             Bonfire.Social.Objects.LiveHandler.load_object_assigns(socket) do
         {:noreply, socket}
+      else
+        {:error, :not_found} ->
+          error(id, "Post not found")
+          {:error, :not_found}
+
+        #   {:noreply, socket
+        #   |> assign(:object, :not_found)}
+
+        {:error, e} ->
+          error(e)
+          {:noreply, assign_error(socket, e)}
+
+        other ->
+          error(other)
+          {:noreply, socket}
+      end
     end
   end
 
@@ -129,5 +139,20 @@ defmodule Bonfire.UI.Posts.PostLive do
     {:noreply,
      socket
      |> redirect_to(redirect_path)}
+  end
+
+  # Check Accept header from the URL/request
+  defp accepts_markdown?(socket) do
+    # Check if the request came with markdown accept header
+    # This would typically be handled at the router/controller level
+    case get_connect_info(socket, :x_headers) do
+      headers when is_list(headers) ->
+        Enum.any?(headers, fn {key, value} ->
+          String.downcase(key) == "accept" and String.contains?(value, "text/markdown")
+        end)
+
+      _ ->
+        false
+    end
   end
 end

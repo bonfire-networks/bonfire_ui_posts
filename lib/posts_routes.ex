@@ -10,6 +10,8 @@ defmodule Bonfire.UI.Posts.Routes do
         # live "/post", PostLive, as: Bonfire.Data.Social.Post
         live("/post/:id", PostLive, as: Bonfire.Data.Social.Post)
         live("/post/:id/reply/:reply_to_id", PostLive, as: Bonfire.Data.Social.Post)
+
+        get "/post/markdown/:id", MarkdownPostController, :download_markdown
       end
 
       # pages you need to view as a user
