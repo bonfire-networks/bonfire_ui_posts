@@ -11,7 +11,7 @@ defmodule Bonfire.UI.Posts.PostLive do
 
   on_mount {LivePlugs, [Bonfire.UI.Me.LivePlugs.LoadCurrentUser]}
 
-  def mount(params, _session, socket) do
+  def mount(params, session, socket) do
     # is_guest? = is_nil(current_user_id(socket))
 
     {:ok,
@@ -60,7 +60,8 @@ defmodule Bonfire.UI.Posts.PostLive do
          |> debug("thread mode"),
        search_placeholder: nil,
        #  to_boundaries: nil,
-       loading: false
+       loading: false,
+       accepts_markdown?: accepts_markdown?(session)
      )}
   end
 
@@ -88,7 +89,7 @@ defmodule Bonfire.UI.Posts.PostLive do
     id = String.replace_suffix(request_id, ".md", "")
 
     # Check if requesting markdown format
-    if id != request_id or accepts_markdown?(socket) do
+    if id != request_id or socket.assigns[:accepts_markdown?] do
       {:noreply, redirect_to(socket, "/post/markdown/#{id}")}
     else
       # render the HTML view as usual
@@ -141,15 +142,11 @@ defmodule Bonfire.UI.Posts.PostLive do
      |> redirect_to(redirect_path)}
   end
 
-  # Check Accept header from the URL/request
-  defp accepts_markdown?(socket) do
-    # Check if the request came with markdown accept header
-    # This would typically be handled at the router/controller level
-    case get_connect_info(socket, :x_headers) do
-      headers when is_list(headers) ->
-        Enum.any?(headers, fn {key, value} ->
-          String.downcase(key) == "accept" and String.contains?(value, "text/markdown")
-        end)
+  # Check Accept header from session
+  defp accepts_markdown?(session) do
+    case Map.get(session, "accept_header") do
+      accept_header when is_binary(accept_header) ->
+        String.contains?(accept_header, "text/markdown")
 
       _ ->
         false
