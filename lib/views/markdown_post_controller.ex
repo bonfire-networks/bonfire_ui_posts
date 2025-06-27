@@ -21,7 +21,9 @@ defmodule Bonfire.UI.Posts.MarkdownPostController do
         |> put_resp_content_type("text/markdown")
         |> send_resp(404, "Post not found")
 
-      {:error, _reason} ->
+      error ->
+        error(error, "Could not load post")
+
         conn
         |> put_resp_content_type("text/markdown")
         |> send_resp(500, "Unable to generate markdown")
@@ -29,6 +31,10 @@ defmodule Bonfire.UI.Posts.MarkdownPostController do
   end
 
   defp convert_to_markdown(%{activity: %{object: %{id: _} = object} = activity} = _post) do
+    convert_to_markdown(activity, object)
+  end
+
+  defp convert_to_markdown(%{activity: %{id: _} = activity} = object) do
     convert_to_markdown(activity, object)
   end
 
