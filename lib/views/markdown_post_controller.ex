@@ -7,7 +7,7 @@ defmodule Bonfire.UI.Posts.MarkdownPostController do
            preload: [:with_post_content, :with_media, :with_creator]
          ) do
       {:ok, post} ->
-        # flood(post)
+        # debug(post)
         markdown_content = convert_to_markdown(post)
         filename = "#{id}.md"
 

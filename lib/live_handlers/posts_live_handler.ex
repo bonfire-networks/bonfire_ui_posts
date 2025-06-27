@@ -9,10 +9,12 @@ defmodule Bonfire.Posts.LiveHandler do
 
   def handle_event("post", %{"create_object_type" => "message"} = params, socket) do
     maybe_apply(Bonfire.Messages.LiveHandler, :send_message, [params, socket])
+    # |> debug("ress")
   end
 
   def handle_event("post", %{"post" => %{"create_object_type" => "message"}} = params, socket) do
     maybe_apply(Bonfire.Messages.LiveHandler, :send_message, [params, socket])
+    # |> debug("ress")
   end
 
   # if not a message, it's a post by default
