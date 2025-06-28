@@ -105,6 +105,7 @@ defmodule Bonfire.UI.Posts.PostLive do
           params: params,
           post_id: thread_id,
           thread_id: thread_id,
+          reply_id: reply_id,
           #  url: url
           include_path_ids:
             Bonfire.Social.Threads.LiveHandler.maybe_include_path_ids(
