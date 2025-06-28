@@ -2,6 +2,7 @@ defmodule Bonfire.UI.Posts.PostLive do
   use Bonfire.UI.Common.Web, :surface_live_view
 
   # import Untangle
+  alias Bonfire.Social.Threads
 
   declare_extension("UI for posts",
     icon: "icomoon-free:blog",
@@ -67,13 +68,14 @@ defmodule Bonfire.UI.Posts.PostLive do
 
   def handle_params(%{"id" => "comment_" <> comment_id} = params, _url, socket)
       when is_binary(comment_id) do
+    # deprecated - keeping to avoid broken links
     debug(comment_id, "comment_id that needs redirection")
 
     # Try to find the thread_id for this comment (optimized query)
     current_user = current_user(socket)
 
     with thread_id when is_binary(thread_id) <-
-           Bonfire.Social.Threads.fetch_thread_id(comment_id, current_user: current_user) do
+           Threads.fetch_thread_id(comment_id, current_user: current_user) do
       redirect_to_thread_comment(socket, thread_id, comment_id)
     else
       error ->
@@ -84,13 +86,16 @@ defmodule Bonfire.UI.Posts.PostLive do
     end
   end
 
-  def handle_params(%{"id" => request_id} = params, _url, socket) do
+  def handle_params(%{"id" => thread_id} = params, _url, socket) do
     # Strip .md suffix if present - TOOD: do same for RSS
-    id = String.replace_suffix(request_id, ".md", "")
+    reply_id = e(params, "reply_id", nil)
+
+    maybe_md_id = String.replace_suffix(reply_id || thread_id, ".md", "")
 
     # Check if requesting markdown format
-    if id != request_id or socket.assigns[:accepts_markdown?] do
-      {:noreply, redirect_to(socket, "/post/markdown/#{id}")}
+    if (maybe_md_id != thread_id and maybe_md_id != reply_id) or
+         assigns(socket)[:accepts_markdown?] do
+      {:noreply, redirect_to(socket, "/post/markdown/#{maybe_md_id}")}
     else
       # render the HTML view as usual
 
@@ -98,10 +103,15 @@ defmodule Bonfire.UI.Posts.PostLive do
         socket
         |> assign(
           params: params,
-          post_id: id,
-          thread_id: id
+          post_id: thread_id,
+          thread_id: thread_id,
           #  url: url
-          #  reply_to_id: e(params, "reply_to_id", id)
+          include_path_ids:
+            Bonfire.Social.Threads.LiveHandler.maybe_include_path_ids(
+              reply_id,
+              e(params, "level", nil),
+              e(assigns(socket), :__context__, nil) || assigns(socket)
+            )
         )
 
       with %Phoenix.LiveView.Socket{} = socket <-
@@ -109,7 +119,7 @@ defmodule Bonfire.UI.Posts.PostLive do
         {:noreply, socket}
       else
         {:error, :not_found} ->
-          error(id, "Post not found")
+          error(thread_id, "Post not found")
           {:error, :not_found}
 
         #   {:noreply, socket
@@ -135,7 +145,7 @@ defmodule Bonfire.UI.Posts.PostLive do
   defp redirect_to_thread_comment(socket, thread_id, comment_id) do
     debug(thread_id, "redirecting to thread")
 
-    redirect_path = "/discussion/#{thread_id}#comment_#{comment_id}"
+    redirect_path = "/discussion/#{thread_id}/reply/#{comment_id}"
 
     {:noreply,
      socket
