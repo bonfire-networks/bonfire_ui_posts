@@ -48,6 +48,7 @@ defmodule Bonfire.UI.Posts.PostLive do
        #  without_sidebar: true,
        post_id: nil,
        thread_id: nil,
+       reply_id: nil,
        page_info: nil,
        replies: nil,
        threaded_replies: nil,
