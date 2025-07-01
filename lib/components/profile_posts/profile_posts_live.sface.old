@@ -6,8 +6,8 @@
       ComponentID.new(Bonfire.UI.Social.FeedLive, @feed_ids || @feed_id, __MODULE__) --}
     <StatefulComponent
       module={maybe_component(Bonfire.UI.Social.FeedLive, @__context__)}
-      id={@feed_component_id || "user_#{@selected_tab}_#{id(@user)}"}
-      feed_id={"user_#{@selected_tab}_#{id(@user)}"}
+      id={@feed_component_id || "profile_#{@selected_tab}_#{id(@user)}"}
+      feed_id={"profile_#{@selected_tab}_#{id(@user)}"}
       subject_user={@user}
       page_title={@page_title}
       feed={@feed}
