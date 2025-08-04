@@ -5,7 +5,7 @@ defmodule Bonfire.UI.Posts.PostLive do
   alias Bonfire.Social.Threads
 
   declare_extension("UI for posts",
-    icon: "icomoon-free:blog",
+    icon: "ph:article-ny-times-duotone",
     emoji: "📝",
     description: l("User interface for writing and reading posts.")
   )
