@@ -44,6 +44,7 @@ defmodule Bonfire.UI.Posts.MarkdownPostController do
     ---
     title: #{e(post, :post_content, :name, "")}
     description: #{e(post, :post_content, :summary, "") |> String.replace(~r/[\r\n]+/, " ")}
+    uri: #{URIs.canonical_url(post)}
     date: #{DatesTimes.format(id(post))}  
     author: #{e(post, :created, :creator, :profile, :name, nil) || e(post, :created, :creator, :character, :username, nil)}
     image: #{get_primary_image(e(activity, :media, [])) |> Media.media_url()}
@@ -51,9 +52,14 @@ defmodule Bonfire.UI.Posts.MarkdownPostController do
 
     ---
 
-    #{e(post, :post_content, :html_body, "")}
+    #{e(post, :post_content, :html_body, "") |> make_markdown_links_absolute(URIs.base_url())}
 
     """
+  end
+
+  defp make_markdown_links_absolute(markdown, base_url) do
+    Regex.replace(~r/(\]\()\/([^)]+)\)/, markdown, "\\1#{base_url}/\\2)")
+    |> Regex.replace(~r/(!\[.*?\]\()\/([^)]+)\)/, ..., "\\1#{base_url}/\\2)")
   end
 
   def get_primary_image(files) when is_list(files) do
