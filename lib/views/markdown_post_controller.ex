@@ -1,14 +1,19 @@
 defmodule Bonfire.UI.Posts.MarkdownPostController do
   use Bonfire.UI.Common.Web, :controller
 
-  def download_markdown(conn, %{"id" => id}) do
+  def download_markdown(conn, %{"id" => id} = params) do
     case Bonfire.Posts.read(id,
            current_user: current_user(conn),
            preload: [:with_post_content, :with_media, :with_creator]
          ) do
       {:ok, post} ->
         # debug(post)
-        markdown_content = convert_to_markdown(post)
+        markdown_content =
+          convert_activity_to_markdown(post,
+            with_frontmatter: params["frontmatter"] == "true",
+            with_replies: params["replies"] == "true"
+          )
+
         filename = "#{id}.md"
 
         conn
@@ -30,36 +35,63 @@ defmodule Bonfire.UI.Posts.MarkdownPostController do
     end
   end
 
-  defp convert_to_markdown(%{activity: %{object: %{id: _} = object} = activity} = _post) do
-    convert_to_markdown(activity, object)
+  def convert_activity_to_markdown(activity, opts \\ [])
+
+  def convert_activity_to_markdown(
+        %{activity: %{object: %{id: _} = object} = activity} = _post,
+        opts
+      ) do
+    convert_post_to_markdown(activity, object, opts)
   end
 
-  defp convert_to_markdown(%{activity: %{id: _} = activity} = object) do
-    convert_to_markdown(activity, object)
+  def convert_activity_to_markdown(%{activity: %{id: _} = activity} = object, opts) do
+    convert_post_to_markdown(activity, object, opts)
   end
 
-  defp convert_to_markdown(activity, post) do
-    # TODO: tags
-    """
-    ---
-    title: #{e(post, :post_content, :name, "")}
-    description: #{e(post, :post_content, :summary, "") |> String.replace(~r/[\r\n]+/, " ")}
-    uri: #{URIs.canonical_url(post)}
-    date: #{DatesTimes.format(id(post))}  
-    author: #{e(post, :created, :creator, :profile, :name, nil) || e(post, :created, :creator, :character, :username, nil)}
-    image: #{get_primary_image(e(activity, :media, [])) |> Media.media_url()}
-    tags: 
+  def convert_post_to_markdown(activity \\ nil, post, opts) do
+    base_url = URIs.base_url()
+    with_replies = opts[:with_replies]
+    with_frontmatter = opts[:with_frontmatter]
 
-    ---
+    root_content =
+      if with_frontmatter do
+        Bonfire.UI.Posts.render_markdown_content(post, 0, only_body: true)
+      else
+        Bonfire.UI.Posts.render_markdown_content(post, 0, include_author: false)
+      end
 
-    #{e(post, :post_content, :html_body, "") |> make_markdown_links_absolute(URIs.base_url())}
+    replies =
+      if with_replies do
+        Bonfire.UI.Posts.render_replies(id(post), :markdown, include_author: true, init_level: 1)
+      else
+        []
+      end
 
-    """
-  end
+    content =
+      ([root_content] ++ replies)
+      |> Enum.reject(&(&1 in [nil, ""]))
+      |> Enum.join("\n\n")
 
-  defp make_markdown_links_absolute(markdown, base_url) do
-    Regex.replace(~r/(\]\()\/([^)]+)\)/, markdown, "\\1#{base_url}/\\2)")
-    |> Regex.replace(~r/(!\[.*?\]\()\/([^)]+)\)/, ..., "\\1#{base_url}/\\2)")
+    if with_frontmatter do
+      # TODO: tags
+      """
+      ---
+      title: "#{e(post, :post_content, :name, nil)}"
+      description: "#{e(post, :post_content, :summary, "") |> String.replace(~r/[\r\n]+/, " ") |> String.replace("\"", "'")}"
+      uri: #{URIs.canonical_url(post)}
+      date: #{DatesTimes.format(id(post))}  
+      author: "#{e(post, :created, :creator, :profile, :name, nil) || e(post, :created, :creator, :character, :username, nil)}"
+      image: #{get_primary_image(e(activity, :media, []) || e(post, :media, [])) |> Media.media_url()}
+      tags: 
+
+      ---
+
+      #{content}
+
+      """
+    else
+      content
+    end
   end
 
   def get_primary_image(files) when is_list(files) do
