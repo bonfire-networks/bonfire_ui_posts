@@ -22,6 +22,8 @@ defmodule Bonfire.Posts.LiveHandler do
     debug(params, "post_paramssss")
     upload_metadata = params["upload_metadata"]
 
+    # Bonfire.UI.Common.SmartInput.LiveHandler.set_smart_input_opts(socket, %{input_status: :submit})
+
     attrs =
       params
       # Remove upload_metadata before conversion
@@ -86,9 +88,7 @@ defmodule Bonfire.Posts.LiveHandler do
       {
         :noreply,
         socket
-
         # |> Bonfire.UI.Common.SmartInput.LiveHandler.close_smart_input()
-        |> push_event("smart_input:reset", %{})
         |> Bonfire.UI.Common.SmartInput.LiveHandler.reset_input()
         |> assign_flash(
           :info,
