@@ -32,6 +32,7 @@ defmodule Bonfire.UI.Posts.PostLive do
 
        #  smart_input_opts: %{prompt: l("Reply")},
        activity: nil,
+       include_path_ids: nil,
        back: true,
        showing_within: :thread,
        object: nil,
