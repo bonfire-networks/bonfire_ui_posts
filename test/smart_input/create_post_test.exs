@@ -8,8 +8,8 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
   alias Bonfire.Social.Graph.Follows
   alias Bonfire.Files.Test
 
-  # FIXME
-  @tag :skip_ci
+  # FIXME when PhoenixTest can handle portals
+  @tag :skip
   describe "create a post" do
     test "works" do
       some_account = fake_account!()
@@ -26,8 +26,8 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
       |> assert_has_or_open_browser("[data-id=feed] article", text: content)
     end
 
-    # FIXME
-    @tag :skip_ci
+    # FIXME when PhoenixTest can handle portals
+    @tag :skip
     test "shows up on my profile timeline" do
       some_account = fake_account!()
       someone = fake_user!(some_account)
@@ -43,8 +43,8 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
       |> assert_has("[data-id=feed] article", text: content)
     end
 
-    # FIXME
-    @tag :skip_ci
+    # FIXME when PhoenixTest can handle portals
+    @tag :skip
     test "shows up in feed right away" do
       some_account = fake_account!()
       someone = fake_user!(some_account)
@@ -60,8 +60,8 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
       |> assert_has_or_open_browser("[data-id=feed]", text: content)
     end
 
-    # FIXME
-    @tag :skip_ci
+    # FIXME when PhoenixTest can handle portals
+    @tag :skip
     test "i can reply in feed right away" do
       some_account = fake_account!()
       someone = fake_user!(some_account)
