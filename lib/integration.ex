@@ -111,7 +111,7 @@ defmodule Bonfire.UI.Posts do
   end
 
   def render_markdown_content(entity, level \\ 0, opts \\ []) do
-    base_url = URIs.base_url()
+    # base_url = URIs.base_url()
     only_body = Keyword.get(opts, :only_body, false)
     include_author = Keyword.get(opts, :include_author, true)
 
@@ -132,7 +132,7 @@ defmodule Bonfire.UI.Posts do
           }
       end
 
-    body = body |> make_markdown_links_absolute(base_url)
+    body = body |> Text.make_links_absolute(:markdown)
 
     cond do
       only_body ->
@@ -181,15 +181,5 @@ defmodule Bonfire.UI.Posts do
     |> String.split("\n")
     |> Enum.map(&(quote_prefix <> &1))
     |> Enum.join("\n")
-  end
-
-  def make_markdown_links_absolute(markdown, base_url)
-      when is_binary(markdown) and byte_size(markdown) > 10 do
-    Regex.replace(~r/(\]\()\/([^)]+)\)/, markdown, "\\1#{base_url}/\\2)")
-    |> Regex.replace(~r/(!\[.*?\]\()\/([^)]+)\)/, ..., "\\1#{base_url}/\\2)")
-  end
-
-  def make_markdown_links_absolute(markdown, _base_url) do
-    markdown
   end
 end
