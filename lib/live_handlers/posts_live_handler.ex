@@ -7,6 +7,51 @@ defmodule Bonfire.Posts.LiveHandler do
   # alias Bonfire.Data.Social.Post
   # alias Ecto.Changeset
 
+  # Helper function to transform verb permissions to backend format
+  defp transform_circles_for_backend(params) do
+    case params["verb_permissions_json"] do
+      json when is_binary(json) and json != "" ->
+        try do
+          verb_permissions = Jason.decode!(json) |> debug("decoded verb_permissions")
+
+          if verb_permissions != %{} do
+            # Transform verb permissions to direct verb grants format
+            {to_circles, verb_grants} =
+              Bonfire.UI.Boundaries.VerbPermissionsHelper.transform_to_verb_grants_format(
+                verb_permissions
+              )
+
+            debug({to_circles, verb_grants}, "transformed to verb_grants format")
+            {to_circles, verb_grants}
+          else
+            # Fallback to raw form data
+            debug("empty verb_permissions, using raw data")
+            {normalize_circles_from_params(params["to_circles"] || []), []}
+          end
+        rescue
+          Jason.DecodeError ->
+            debug("JSON decode error, using raw data")
+            # Fallback to raw form data
+            {normalize_circles_from_params(params["to_circles"] || []), []}
+        end
+
+      _ ->
+        debug("no verb_permissions_json found, using raw data")
+        # No verb permissions, use raw form data
+        {normalize_circles_from_params(params["to_circles"] || []), []}
+    end
+  end
+
+  # Helper to normalize circles from form params to expected format
+  defp normalize_circles_from_params(circles) when is_map(circles) do
+    Enum.map(circles, fn {circle_id, role} ->
+      {%{id: circle_id}, role}
+    end)
+  end
+
+  defp normalize_circles_from_params(circles) when is_list(circles), do: circles
+  defp normalize_circles_from_params(_), do: []
+
   def handle_event("post", %{"create_object_type" => "message"} = params, socket) do
     maybe_apply(Bonfire.Messages.LiveHandler, :send_message, [params, socket])
     # |> debug("ress")
@@ -26,8 +71,9 @@ defmodule Bonfire.Posts.LiveHandler do
 
     attrs =
       params
-      # Remove upload_metadata before conversion
+      # Remove upload_metadata and verb_permissions_json before conversion to avoid mixed key issues
       |> Map.delete("upload_metadata")
+      |> Map.delete("verb_permissions_json")
       |> input_to_atoms(
         discard_unknown_keys: false,
         also_discard_unknown_nested_keys: false,
@@ -41,6 +87,8 @@ defmodule Bonfire.Posts.LiveHandler do
 
     with %{valid?: true} <- post_changeset(attrs, current_user),
          uploaded_media <- live_upload_files(current_user, upload_metadata, socket),
+         # Transform verb permissions to backend format
+         {final_to_circles, verb_grants} <- transform_circles_for_backend(params),
          opts <-
            [
              #  current_user: current_user,
@@ -49,7 +97,8 @@ defmodule Bonfire.Posts.LiveHandler do
                Bonfire.Posts.prepare_post_attrs(attrs)
                |> Map.put(:uploaded_media, uploaded_media),
              boundary: e(params, "to_boundaries", "mentions"),
-             to_circles: e(params, "to_circles", []),
+             to_circles: final_to_circles,
+             verb_grants: verb_grants,
              context_id: e(params, "context_id", nil),
              return_epic_on_error: true
            ]
