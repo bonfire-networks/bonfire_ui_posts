@@ -25,10 +25,10 @@ defmodule Bonfire.Posts.LiveHandler do
     # end
   end
 
-  defp do_transform_circles_for_backend(to_circles, verb_permissions \\ %{}) do
+  defp do_transform_circles_for_backend(to_circles, verb_permissions \\ nil) do
     {
       normalize_circles_from_params(to_circles || []),
-      if verb_permissions != %{} do
+      if not is_nil(verb_permissions) and verb_permissions != %{} do
         # Transform verb permissions to direct verb grants format
         Bonfire.UI.Boundaries.VerbPermissionsHelper.transform_to_verb_grants_format(
           verb_permissions
