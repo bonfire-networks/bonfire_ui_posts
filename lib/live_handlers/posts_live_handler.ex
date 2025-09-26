@@ -9,37 +9,36 @@ defmodule Bonfire.Posts.LiveHandler do
 
   # Helper function to transform verb permissions to backend format
   defp transform_circles_for_backend(params) do
-    case params["verb_permissions_json"] do
-      json when is_binary(json) and json != "" ->
-        try do
-          verb_permissions = Jason.decode!(json) |> debug("decoded verb_permissions")
+    # case params["verb_permissions_json"] do
+    #   json when is_binary(json) and json != "" ->
+    #     with {:ok, verb_permissions} <- Jason.decode(json) |> debug("decoded verb_permissions") do
+    #       do_transform_circles_for_backend(params["to_circles"], verb_permissions)
+    #     else
+    #       e ->
+    #         warn(e, "invalid verb_permissions_json, using raw data")
+    #         do_transform_circles_for_backend(params["to_circles"], params["verb_permissions"])
+    #     end
 
-          if verb_permissions != %{} do
-            # Transform verb permissions to direct verb grants format
-            {to_circles, verb_grants} =
-              Bonfire.UI.Boundaries.VerbPermissionsHelper.transform_to_verb_grants_format(
-                verb_permissions
-              )
+    #   _ ->
+    debug("no verb_permissions_json, using raw data")
+    do_transform_circles_for_backend(params["to_circles"], params["verb_permissions"])
+    # end
+  end
 
-            debug({to_circles, verb_grants}, "transformed to verb_grants format")
-            {to_circles, verb_grants}
-          else
-            # Fallback to raw form data
-            debug("empty verb_permissions, using raw data")
-            {normalize_circles_from_params(params["to_circles"] || []), []}
-          end
-        rescue
-          Jason.DecodeError ->
-            debug("JSON decode error, using raw data")
-            # Fallback to raw form data
-            {normalize_circles_from_params(params["to_circles"] || []), []}
-        end
-
-      _ ->
-        debug("no verb_permissions_json found, using raw data")
-        # No verb permissions, use raw form data
-        {normalize_circles_from_params(params["to_circles"] || []), []}
-    end
+  defp do_transform_circles_for_backend(to_circles, verb_permissions \\ %{}) do
+    {
+      normalize_circles_from_params(to_circles || []),
+      if verb_permissions != %{} do
+        # Transform verb permissions to direct verb grants format
+        Bonfire.UI.Boundaries.VerbPermissionsHelper.transform_to_verb_grants_format(
+          verb_permissions
+        )
+      else
+        # Fallback to raw form data
+        debug("empty verb_permissions, using to_circles only")
+        []
+      end
+    }
   end
 
   # Helper to normalize circles from form params to expected format
@@ -72,8 +71,7 @@ defmodule Bonfire.Posts.LiveHandler do
     attrs =
       params
       # Remove upload_metadata and verb_permissions_json before conversion to avoid mixed key issues
-      |> Map.delete("upload_metadata")
-      |> Map.delete("verb_permissions_json")
+      |> Map.drop(["upload_metadata", "verb_permissions_json", "verb_permissions"])
       |> input_to_atoms(
         discard_unknown_keys: false,
         also_discard_unknown_nested_keys: false,
@@ -88,7 +86,8 @@ defmodule Bonfire.Posts.LiveHandler do
     with %{valid?: true} <- post_changeset(attrs, current_user),
          uploaded_media <- live_upload_files(current_user, upload_metadata, socket),
          # Transform verb permissions to backend format
-         {final_to_circles, verb_grants} <- transform_circles_for_backend(params),
+         {final_to_circles, verb_grants} <-
+           transform_circles_for_backend(params) |> debug("final circles and verb grants"),
          opts <-
            [
              #  current_user: current_user,
