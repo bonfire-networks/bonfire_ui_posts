@@ -1,5 +1,5 @@
 defmodule Bonfire.UI.Posts.CreatePostTest do
-  use Bonfire.UI.Posts.ConnCase, async: true
+  use Bonfire.UI.Posts.ConnCase, async: System.get_env("TEST_UI_ASYNC") != "no"
   use Bonfire.Common.Utils
   import Bonfire.Files.Simulation
 
