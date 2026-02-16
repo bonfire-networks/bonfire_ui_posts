@@ -36,7 +36,7 @@
       </div>
     </div>
     <:open_btn>
-      <div class="flex items-center w-full gap-2 justify-between text-sm text-base-content">
+      <div class="flex items-center w-full gap-2 cursor-pointer justify-between text-sm text-base-content">
         <span class={"text-sm font-medium", "sr-only": @as_icon}>{l("Download as Markdown")}</span>
         <#Icon iconify="ph:download-simple" class="w-5 h-5 shrink-0" />
       </div>
