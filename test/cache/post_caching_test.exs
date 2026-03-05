@@ -30,6 +30,12 @@ defmodule Bonfire.UI.Posts.PostCachingTest do
       [PurgeAdapter]
     )
 
+    # Write static cache synchronously so assertions can check the file immediately
+    Process.put(
+      [:bonfire_ui_common, Bonfire.UI.Common.MaybeStaticGeneratorPlug, :sync_static_write],
+      true
+    )
+
     account = fake_account!()
     author = fake_user!(account)
     post = PostFake.fake_post!(author)
