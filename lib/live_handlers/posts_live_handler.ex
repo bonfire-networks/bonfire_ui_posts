@@ -142,29 +142,17 @@ defmodule Bonfire.Posts.LiveHandler do
           :info,
           "<span>#{l("Posted!")}</span> <a href='#{permalink}' class='ml-2 link link-hover font-semibold text-primary'>#{l("Show")} →</a>"
         )
-        # |> patch_to(current_url(socket), fallback: path(published)) # so the flash appears - TODO: causes a conflict between the activity coming in via pubsub
-
-        # assign_generic(socket,
-        #   feed: [%{published.activity | object_post: published.post, subject_user: current_user_required!(socket)}] ++ Map.get(assigns(socket), :feed, [])
-        # )
       }
+    else
+      e ->
+        error(e, "Could not post")
 
-      # else
-      #   {:error, error} ->
-      #     {
-      #       :noreply,
-      #       socket
-      #       |> assign_error(error)
-      #     }
-      #   e ->
-      #     error = Errors.error_msg(e)
-      #     error(error)
-
-      #     {
-      #       :noreply,
-      #       socket
-      #       |> assign_error("Could not post 😢 (#{error})")
-      #     }
+        {
+          :noreply,
+          socket
+          |> Bonfire.UI.Common.SmartInput.LiveHandler.reset_input()
+          |> assign_error(l("Could not publish your post"))
+        }
     end
   end
 
