@@ -155,7 +155,7 @@ defmodule Bonfire.UI.Posts.Benchmark do
                          "Verify the StaticGenerator purge adapter was active and cacheable_response? returned true during setup."
                end
 
-               Cache.remove("static_gen:/post/#{post_id}")
+               Cache.remove("/post/#{post_id}")
                Cache.remove("static_gen_hits:/post/#{post_id}")
 
                post_id
@@ -164,7 +164,7 @@ defmodule Bonfire.UI.Posts.Benchmark do
           "browser_or_cacheable: memory cache hit (unauthenticated)" =>
             {fn post_id -> get(guest_conn, "/post/#{post_id}") end,
              before_scenario: fn post_id ->
-               unless Cache.get!("static_gen:/post/#{post_id}") do
+               unless Cache.get!("/post/#{post_id}") do
                  Config.put(
                    [:bonfire_ui_common, MaybeStaticGeneratorPlug, :memory_cache_threshold],
                    1
@@ -178,7 +178,7 @@ defmodule Bonfire.UI.Posts.Benchmark do
                  )
                end
 
-               unless Cache.get!("static_gen:/post/#{post_id}") do
+               unless Cache.get!("/post/#{post_id}") do
                  raise "memory cache entry still missing after promotion attempt for /post/#{post_id} — " <>
                          "check MaybeStaticGeneratorPlug threshold config and that the disk file exists."
                end

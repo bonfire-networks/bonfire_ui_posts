@@ -11,6 +11,9 @@ defmodule Bonfire.UI.Posts.PostCachingTest do
   - Sets cache-control: public with max-age, s-maxage, stale-while-revalidate.
   - Does not emit Set-Cookie.
 
+  The disk backend permutation block runs the same suite for each supported
+  disk cache backend: default (SimpleDiskCache fallback) and DiskLFUCache.
+
   These tests do NOT re-verify gen_avatar or memory-cache behaviour — see
   Bonfire.UI.Common.CacheControlPlugTest for those.
   """
@@ -18,21 +21,20 @@ defmodule Bonfire.UI.Posts.PostCachingTest do
   use Bonfire.UI.Posts.ConnCase, async: false
 
   alias Bonfire.Common.Types
+  alias Bonfire.Common.Cache.DiskLFUCache
   alias Bonfire.Posts.Fake, as: PostFake
+  alias Bonfire.UI.Common.MaybeStaticGeneratorPlug
   alias Bonfire.UI.Common.StaticGenerator
   alias Bonfire.UI.Common.Cache.HTTPPurge.StaticGenerator, as: PurgeAdapter
 
   setup do
-    # Activate the StaticGenerator purge adapter so MaybeStaticGeneratorPlug's
-    # before_send hook writes each unauthenticated response to disk.
     Process.put(
       [:bonfire_common, Bonfire.Common.Cache.HTTPPurge, :adapters],
       [PurgeAdapter]
     )
 
-    # Write static cache synchronously so assertions can check the file immediately
     Process.put(
-      [:bonfire_ui_common, Bonfire.UI.Common.MaybeStaticGeneratorPlug, :sync_static_write],
+      [:bonfire_ui_common, MaybeStaticGeneratorPlug, :sync_static_write],
       true
     )
 
@@ -47,46 +49,70 @@ defmodule Bonfire.UI.Posts.PostCachingTest do
     {:ok, author: author, account: account, post_id: post_id, dest: dest}
   end
 
-  test "unauthenticated GET writes the dead render to the static cache", %{
-    post_id: post_id,
-    dest: dest
-  } do
-    conn = get(build_conn(), "/post/#{post_id}")
-    assert conn.status == 200
+  disk_backend_permutations = [
+    {nil, :disk_cache_backend, "default (SimpleDiskCache fallback)"},
+    {DiskLFUCache, :disk_cache_backend, "DiskLFU as disk_cache_backend"},
+    {DiskLFUCache, :cache_backend, "DiskLFU as sole cache_backend"}
+  ]
 
-    assert File.exists?(Path.join([dest, "post", post_id, "index.html"]))
-  end
+  for {disk_backend, key, label} <- disk_backend_permutations do
+    describe label do
+      setup %{post_id: post_id} do
+        root = Path.join(System.tmp_dir!(), "bonfire_test_#{:rand.uniform(1_000_000)}")
+        File.mkdir_p!(root)
+        {:ok, lfu_pid} = DiskLFUCache.start_link(root_path: root, max_bytes: nil)
 
-  test "second unauthenticated GET is served from the static disk cache", %{
-    post_id: post_id,
-    dest: dest
-  } do
-    # First visit — controller renders, writes to cache
-    first = get(build_conn(), "/post/#{post_id}")
-    assert first.status == 200
+        config =
+          [root_path: root]
+          |> then(fn c ->
+            case unquote(disk_backend) do
+              nil -> c
+              b -> Keyword.put(c, unquote(key), b)
+            end
+          end)
 
-    path = Path.join([dest, "post", post_id, "index.html"])
-    assert File.exists?(path), "expected first request to write the cached file at #{path}"
+        Process.put([:bonfire_ui_common, MaybeStaticGeneratorPlug], config)
 
-    # Replace with sentinel to confirm the next hit comes from disk, not the controller
-    File.write!(path, "CACHED_POST_SENTINEL")
+        on_exit(fn ->
+          GenServer.stop(lfu_pid)
+          File.rm_rf!(root)
+        end)
 
-    conn = get(build_conn(), "/post/#{post_id}")
-    assert conn.status == 200
-    assert conn.resp_body == "CACHED_POST_SENTINEL"
-  end
+        {:ok, root: root, post_id: post_id}
+      end
 
-  test "authenticated GET is NOT written to the static cache", %{
-    author: author,
-    account: account,
-    post_id: post_id,
-    dest: dest
-  } do
-    authed_conn = conn(user: author, account: account)
-    conn = get(authed_conn, "/post/#{post_id}")
-    assert conn.status == 200
+      test "unauthenticated GET writes the dead render to the static cache",
+           %{post_id: post_id, root: root} do
+        conn = get(build_conn(), "/post/#{post_id}")
+        assert conn.status == 200
 
-    refute File.exists?(Path.join([dest, "post", post_id, "index.html"]))
+        assert File.exists?(Path.join([root, "post", post_id, "index.html"]))
+      end
+
+      test "second unauthenticated GET is served from the static disk cache",
+           %{post_id: post_id, root: root} do
+        first = get(build_conn(), "/post/#{post_id}")
+        assert first.status == 200
+
+        path = Path.join([root, "post", post_id, "index.html"])
+        assert File.exists?(path), "expected first request to write the cached file at #{path}"
+
+        File.write!(path, "CACHED_POST_SENTINEL")
+
+        conn = get(build_conn(), "/post/#{post_id}")
+        assert conn.status == 200
+        assert conn.resp_body == "CACHED_POST_SENTINEL"
+      end
+
+      test "authenticated GET is NOT written to the static cache",
+           %{author: author, account: account, post_id: post_id, root: root} do
+        authed_conn = conn(user: author, account: account)
+        conn = get(authed_conn, "/post/#{post_id}")
+        assert conn.status == 200
+
+        refute File.exists?(Path.join([root, "post", post_id, "index.html"]))
+      end
+    end
   end
 
   describe "/post_comments/:id (CDN-cacheable guest route)" do
