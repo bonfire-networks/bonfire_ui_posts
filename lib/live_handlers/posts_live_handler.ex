@@ -145,7 +145,7 @@ defmodule Bonfire.Posts.LiveHandler do
       }
     else
       e ->
-        error(e, "Could not post")
+        error(e, "Could not publish your post")
 
         {
           :noreply,
