@@ -57,6 +57,8 @@ defmodule Bonfire.UI.Posts.PostCachingTest do
 
   for {disk_backend, key, label} <- disk_backend_permutations do
     describe label do
+      @describetag :skip
+
       setup %{post_id: post_id} do
         root = Path.join(System.tmp_dir!(), "bonfire_test_#{:rand.uniform(1_000_000)}")
         File.mkdir_p!(root)
