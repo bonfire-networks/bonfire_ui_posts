@@ -93,7 +93,7 @@ defmodule Bonfire.Posts.LiveHandler do
              #  current_user: current_user,
              context: assigns(socket)[:__context__] || current_user,
              post_attrs:
-               Bonfire.Posts.prepare_post_attrs(attrs)
+               Bonfire.Posts.prepare_post_attrs(attrs, append_url: params["quoted_url"])
                |> Map.put(:uploaded_media, uploaded_media),
              boundary: e(params, "to_boundaries", "mentions"),
              to_circles: final_to_circles,
