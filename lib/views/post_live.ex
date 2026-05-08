@@ -58,7 +58,7 @@ defmodule Bonfire.UI.Posts.PostLive do
               [Bonfire.UI.Social.ThreadLive, :thread_mode],
               nil,
               assigns(socket)[:__context__]
-            ) || :nested)
+            ))
          |> debug("thread mode"),
        search_placeholder: nil,
        #  to_boundaries: nil,
