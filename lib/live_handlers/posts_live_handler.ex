@@ -104,7 +104,8 @@ defmodule Bonfire.Posts.LiveHandler do
              to_circles: final_to_circles,
              verb_grants: verb_grants,
              context_id: e(params, "context_id", nil),
-             return_epic_on_error: true
+             return_epic_on_error: true,
+             mentions_prefetched: true
            ]
            |> debug("publish opts"),
          {:ok, published} <- Bonfire.Posts.publish(opts) do

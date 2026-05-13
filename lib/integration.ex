@@ -132,7 +132,7 @@ defmodule Bonfire.UI.Posts do
           }
       end
 
-    body = body |> Text.make_links_absolute(:markdown)
+    body = body |> Text.prepare_links_for_remote_render(:markdown)
 
     cond do
       only_body ->
