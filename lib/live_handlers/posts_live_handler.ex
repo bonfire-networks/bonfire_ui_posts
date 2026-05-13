@@ -7,8 +7,13 @@ defmodule Bonfire.Posts.LiveHandler do
   # alias Bonfire.Data.Social.Post
   # alias Ecto.Changeset
 
-  # Helper function to transform verb permissions to backend format
-  defp transform_circles_for_backend(params) do
+  @doc """
+  Transform form params (`to_circles`, `verb_permissions`) into the backend
+  shape the boundary/publish opts expect — a `{to_circles, verb_grants}`
+  tuple. Public so other composers (poll, page, …) can reuse the same
+  audience/verb plumbing the post composer does.
+  """
+  def transform_circles_for_backend(params) do
     # case params["verb_permissions_json"] do
     #   json when is_binary(json) and json != "" ->
     #     with {:ok, verb_permissions} <- Jason.decode(json) |> debug("decoded verb_permissions") do
