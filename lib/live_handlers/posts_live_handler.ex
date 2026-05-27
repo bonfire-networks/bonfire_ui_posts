@@ -69,46 +69,8 @@ defmodule Bonfire.Posts.LiveHandler do
   # if not a message, it's a post by default
   def handle_event("post", params, socket) do
     debug(params, "post_paramssss")
-    upload_metadata = params["upload_metadata"]
 
-    # Bonfire.UI.Common.SmartInput.LiveHandler.set_smart_input_opts(socket, %{input_status: :submit})
-
-    attrs =
-      params
-      # Remove upload_metadata and verb_permissions_json before conversion to avoid mixed key issues
-      |> Map.drop(["upload_metadata", "verb_permissions_json", "verb_permissions"])
-      |> input_to_atoms(
-        discard_unknown_keys: false,
-        also_discard_unknown_nested_keys: false,
-        force: false,
-        including_values: false
-      )
-      |> debug("post_attrssss")
-
-    # debug(e(assigns(socket), :showing_within, nil), "SHOWING")
-    current_user = current_user_required!(socket)
-
-    with %{valid?: true} <- post_changeset(attrs, current_user),
-         uploaded_media <- live_upload_files(current_user, upload_metadata, socket),
-         # Transform verb permissions to backend format
-         {final_to_circles, verb_grants} <-
-           transform_circles_for_backend(params) |> debug("final circles and verb grants"),
-         opts <-
-           [
-             #  current_user: current_user,
-             context: assigns(socket)[:__context__] || current_user,
-             post_attrs:
-               Bonfire.Posts.prepare_post_attrs(attrs, append_url: params["quoted_url"])
-               |> Map.put(:uploaded_media, uploaded_media),
-             boundary: e(params, "to_boundaries", "mentions"),
-             to_circles: final_to_circles,
-             verb_grants: verb_grants,
-             context_id: e(params, "context_id", nil),
-             return_epic_on_error: true,
-             mentions_prefetched: true
-           ]
-           |> debug("publish opts"),
-         {:ok, published} <- Bonfire.Posts.publish(opts) do
+    with {:ok, published} <- publish_post(params, socket) do
       debug(published, "published!")
 
       activity = e(published, :activity, nil)
@@ -254,5 +216,50 @@ defmodule Bonfire.Posts.LiveHandler do
     debug(attrs, "ATTRS33")
     Posts.changeset(:create, attrs, creator)
     # |> debug("pc")
+  end
+
+  @doc """
+  Shared helper: parse raw LiveView params and publish a post.
+  Called by `handle_event("post", ...)` and any other handler (e.g. broadcast) that needs the
+  full post-publish pipeline: param cleaning → changeset validation → upload handling →
+  circle/permission transform → `Bonfire.Posts.publish/1`.
+
+  Returns `{:ok, published}` or `{:error, reason}`.
+  """
+  def publish_post(params, socket, extra_opts \\ []) do
+    upload_metadata = params["upload_metadata"]
+
+    attrs =
+      params
+      |> Map.drop(["upload_metadata", "verb_permissions_json", "verb_permissions"])
+      |> input_to_atoms(
+        discard_unknown_keys: false,
+        also_discard_unknown_nested_keys: false,
+        force: false,
+        including_values: false
+      )
+
+    current_user = current_user_required!(socket)
+
+    with %{valid?: true} <- post_changeset(attrs, current_user),
+         uploaded_media <- live_upload_files(current_user, upload_metadata, socket),
+         {final_to_circles, verb_grants} <- transform_circles_for_backend(params) do
+      opts =
+        [
+          context: assigns(socket)[:__context__] || current_user,
+          post_attrs:
+            Posts.prepare_post_attrs(attrs, append_url: params["quoted_url"])
+            |> Map.put(:uploaded_media, uploaded_media),
+          boundary: e(params, "to_boundaries", "mentions"),
+          to_circles: final_to_circles,
+          verb_grants: verb_grants,
+          context_id: e(params, "context_id", nil),
+          return_epic_on_error: true,
+          mentions_prefetched: true
+        ]
+        |> Keyword.merge(extra_opts)
+
+      Bonfire.Posts.publish(opts)
+    end
   end
 end
