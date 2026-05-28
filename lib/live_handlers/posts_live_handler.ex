@@ -119,7 +119,15 @@ defmodule Bonfire.Posts.LiveHandler do
           :noreply,
           socket
           |> Bonfire.UI.Common.SmartInput.LiveHandler.reset_input()
-          |> assign_error(l("Could not publish your post"))
+          |> assign_error(
+            case Errors.error_msg(e) do
+              reason when is_binary(reason) and reason != "" ->
+                l("Could not publish your post") <> ": " <> reason
+
+              _ ->
+                l("Could not publish your post")
+            end
+          )
         }
     end
   end
