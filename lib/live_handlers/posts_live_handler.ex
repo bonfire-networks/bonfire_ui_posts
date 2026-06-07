@@ -35,9 +35,7 @@ defmodule Bonfire.Posts.LiveHandler do
       normalize_circles_from_params(to_circles || []),
       if not is_nil(verb_permissions) and verb_permissions != %{} do
         # Transform verb permissions to direct verb grants format
-        Bonfire.UI.Boundaries.VerbPermissionsHelper.transform_to_verb_grants_format(
-          verb_permissions
-        )
+        Bonfire.Boundaries.VerbGrants.transform_to_verb_grants_format(verb_permissions)
       else
         # Fallback to raw form data
         debug("empty verb_permissions, using to_circles only")
