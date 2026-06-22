@@ -68,7 +68,7 @@ defmodule Bonfire.Posts.LiveHandler do
   def handle_event("post", params, socket) do
     debug(params, "post_paramssss")
 
-    with {:ok, published} <- publish_post(params, socket) do
+    with {:ok, published} <- publish_post(params, socket, post_publish_extra_opts(params)) do
       debug(published, "published!")
 
       activity = e(published, :activity, nil)
@@ -232,6 +232,16 @@ defmodule Bonfire.Posts.LiveHandler do
 
   Returns `{:ok, published}` or `{:error, reason}`.
   """
+  # Articles reuse the whole post pipeline, only swapping the schema/type created.
+  defp post_publish_extra_opts(%{"create_object_type" => t}) when t in ["article", :article],
+    do: [schema: Bonfire.Articles.Article]
+
+  defp post_publish_extra_opts(%{"post" => %{"create_object_type" => t}})
+       when t in ["article", :article],
+       do: [schema: Bonfire.Articles.Article]
+
+  defp post_publish_extra_opts(_), do: []
+
   def publish_post(params, socket, extra_opts \\ []) do
     upload_metadata = params["upload_metadata"]
 
