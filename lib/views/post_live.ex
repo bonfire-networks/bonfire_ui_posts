@@ -4,7 +4,7 @@ defmodule Bonfire.UI.Posts.PostLive do
   # import Untangle
   alias Bonfire.Social.Threads
 
-  declare_extension("UI for posts",
+  declare_extension(l("UI for posts"),
     icon: "ph:article-ny-times-duotone",
     emoji: "📝",
     description: l("User interface for writing and reading posts.")
