@@ -66,7 +66,7 @@ defmodule Bonfire.UI.Posts.PostLive do
        search_placeholder: nil,
        #  to_boundaries: nil,
        loading: false,
-       accepts_markdown?: accepts_markdown?(session)
+       accepts_markdown?: http_accepts?(session, "text/markdown")
      )}
   end
 
@@ -155,16 +155,5 @@ defmodule Bonfire.UI.Posts.PostLive do
     {:noreply,
      socket
      |> redirect_to(redirect_path)}
-  end
-
-  # Check Accept header from session
-  defp accepts_markdown?(session) do
-    case Map.get(session, "accept_header") do
-      accept_header when is_binary(accept_header) ->
-        String.contains?(accept_header, "text/markdown")
-
-      _ ->
-        false
-    end
   end
 end
