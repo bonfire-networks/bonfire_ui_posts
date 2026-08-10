@@ -50,7 +50,6 @@ defmodule Bonfire.UI.Posts.PostLive do
        post_id: nil,
        thread_id: nil,
        reply_id: nil,
-       root_boosters: [],
        root_boost_count: 0,
        page_info: nil,
        replies: nil,
