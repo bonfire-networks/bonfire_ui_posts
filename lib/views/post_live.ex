@@ -50,7 +50,6 @@ defmodule Bonfire.UI.Posts.PostLive do
        post_id: nil,
        thread_id: nil,
        reply_id: nil,
-       root_boost_count: 0,
        page_info: nil,
        replies: nil,
        threaded_replies: nil,
@@ -120,7 +119,7 @@ defmodule Bonfire.UI.Posts.PostLive do
 
       with %Phoenix.LiveView.Socket{} = socket <-
              Bonfire.Social.Objects.LiveHandler.load_object_assigns(socket) do
-        {:noreply, Bonfire.Social.Objects.LiveHandler.load_thread_reactions_assigns(socket)}
+        {:noreply, socket}
       else
         {:error, :not_found} ->
           error(thread_id, "Post not found")
