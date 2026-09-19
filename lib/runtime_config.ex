@@ -13,6 +13,20 @@ defmodule Bonfire.UI.Posts.RuntimeConfig do
     # config :bonfire_ui_social,
     #   modularity: :disabled
 
+    # One getting-started step, declared here because writing a post is this extension's feature. The widget that shows it holds no steps of its own, and this list merges with what every other extension declares. The copy is compiled here so `mix gettext.extract` sees it, and the detector is a function below.
+    config :bonfire_ui_common, Bonfire.UI.Common.WidgetGettingStartedLive,
+      actions_registry: [
+        first_post: %{
+          title: l("Write your first post"),
+          rationale: l("Your voice is what makes the feed worth coming back to."),
+          cta_label: l("Compose a post"),
+          cta_kind: :composer,
+          cta_path: nil,
+          needs: Bonfire.Posts,
+          done?: &Bonfire.Posts.any_by?/1
+        }
+      ]
+
     config :bonfire, :ui,
       explore: [
         sections: [
