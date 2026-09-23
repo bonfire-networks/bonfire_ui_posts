@@ -8,17 +8,6 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
   alias Bonfire.Social.Graph.Follows
   alias Bonfire.Files.Test
 
-  defp submit_post(session, content) do
-    session
-    |> PhoenixTest.unwrap(fn view ->
-      view
-      |> Phoenix.LiveViewTest.element("#smart_input_form")
-      |> Phoenix.LiveViewTest.render_submit(%{
-        "post" => %{"post_content" => %{"html_body" => content}}
-      })
-    end)
-  end
-
   describe "create a post" do
     test "works" do
       some_account = fake_account!()
@@ -29,7 +18,7 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
 
       conn
       |> visit("/feed/local")
-      |> submit_post(content)
+      |> submit_composer(content)
       |> wait_async()
       |> assert_has_or_open_browser("[data-id=feed] article", text: content)
     end
@@ -43,7 +32,7 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
 
       conn
       |> visit("/feed/local")
-      |> submit_post(content)
+      |> submit_composer(content)
       |> wait_async()
       |> visit("/user")
       |> assert_has_or_open_browser("[data-id=feed] article", text: content)
@@ -58,7 +47,7 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
 
       conn
       |> visit("/feed")
-      |> submit_post(content)
+      |> submit_composer(content)
       |> wait_async()
       |> assert_has_or_open_browser("[data-id=feed]", text: content)
     end
@@ -81,7 +70,7 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
       conn
       |> visit("/feed")
       |> assert_has("[data-id=feed] article", text: content)
-      |> submit_post(content_reply)
+      |> submit_composer(content_reply)
       |> wait_async()
       |> assert_has_or_open_browser("[data-id=feed] article", text: content_reply)
     end
@@ -106,7 +95,7 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
       bob_conn
       |> visit("/post/#{id(op)}")
       |> click_link("Reply")
-      |> submit_post(content)
+      |> submit_composer(content)
 
       alice_conn = conn(user: alice)
 
