@@ -46,11 +46,10 @@ defmodule Bonfire.UI.Posts.RuntimeConfig do
         widgets: []
       ]
 
-    # Posts: optional title (toggle) and content-warning siren. `nil` covers the
-    # default/reply composer (which is a post).
+    # Keep the optional title discoverable for new posts; InputControlsLive hides it for replies.
     config :bonfire_ui_common, Bonfire.UI.Common.InputControlsLive,
       enable_fields: [
-        title: [post: [enable_toggle: true]],
+        title: [{nil, [show_by_default: true]}, {:post, [show_by_default: true]}],
         sensitive: [{nil, [enable_toggle: true]}, {:post, [enable_toggle: true]}]
       ]
   end
