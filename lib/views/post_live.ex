@@ -119,7 +119,7 @@ defmodule Bonfire.UI.Posts.PostLive do
 
       with %Phoenix.LiveView.Socket{} = socket <-
              Bonfire.Social.Objects.LiveHandler.load_object_assigns(socket) do
-        {:noreply, socket}
+        {:noreply, Bonfire.Social.Objects.LiveHandler.assign_thread_bell(socket)}
       else
         {:error, :not_found} ->
           error(thread_id, "Post not found")
