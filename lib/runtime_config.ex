@@ -46,10 +46,14 @@ defmodule Bonfire.UI.Posts.RuntimeConfig do
         widgets: []
       ]
 
-    # Keep the optional title discoverable for new posts; InputControlsLive hides it for replies.
+    # Optional title only when posting in a group/topic (keeps the personal/mobile composer
+    # short). InputControlsLive hides it for replies.
     config :bonfire_ui_common, Bonfire.UI.Common.InputControlsLive,
       enable_fields: [
-        title: [{nil, [show_by_default: true]}, {:post, [show_by_default: true]}],
+        title: [
+          {nil, [show_in_group: true]},
+          {:post, [show_in_group: true]}
+        ],
         sensitive: [{nil, [enable_toggle: true]}, {:post, [enable_toggle: true]}]
       ]
   end
