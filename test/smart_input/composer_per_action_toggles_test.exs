@@ -20,7 +20,12 @@ defmodule Bonfire.UI.Posts.ComposerPerActionTogglesTest do
   # the toggle switched on or off, as the composer does
   defp toggle(verb_permissions \\ %{}, action_key, allowed?) do
     {updated, _grants} =
-      CustomizeBoundaryLive.apply_action_toggle(allowed?, @preset, verbs_of(action_key), verb_permissions)
+      CustomizeBoundaryLive.apply_action_toggle(
+        allowed?,
+        @preset,
+        verbs_of(action_key),
+        verb_permissions
+      )
 
     updated
   end
@@ -71,7 +76,9 @@ defmodule Bonfire.UI.Posts.ComposerPerActionTogglesTest do
   test "Allow quotes? on: others may quote it" do
     author = fake_user!()
     other = fake_user!()
-    refute Boundaries.can?(other, :quote, publish!(author, %{})), "control: by default they may not"
+
+    refute Boundaries.can?(other, :quote, publish!(author, %{})),
+           "control: by default they may not"
 
     assert Boundaries.can?(other, :quote, publish!(author, toggle("quote", true)))
   end
