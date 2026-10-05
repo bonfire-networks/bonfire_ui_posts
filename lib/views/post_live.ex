@@ -119,7 +119,10 @@ defmodule Bonfire.UI.Posts.PostLive do
 
       with %Phoenix.LiveView.Socket{} = socket <-
              Bonfire.Social.Objects.LiveHandler.load_object_assigns(socket) do
-        {:noreply, Bonfire.Social.Objects.LiveHandler.assign_thread_bell(socket)}
+        case Bonfire.Social.Objects.LiveHandler.reply_in_thread(socket, reply_id) do
+          nil -> {:noreply, Bonfire.Social.Objects.LiveHandler.assign_thread_bell(socket)}
+          in_thread -> {:noreply, redirect_to(socket, in_thread)}
+        end
       else
         {:error, :not_found} ->
           error(thread_id, "Post not found")
@@ -144,6 +147,20 @@ defmodule Bonfire.UI.Posts.PostLive do
      socket
      |> redirect_to(path(:write))}
   end
+
+  # moved to `Bonfire.Social.Objects.LiveHandler.reply_in_thread/2`, which the discussion page shares
+  # defp reply_in_thread(socket, nil) do
+  #   assigns = assigns(socket)
+  #
+  #   if object = assigns[:object] do
+  #     Bonfire.Social.Threads.permalink(
+  #       object,
+  #       e(object, :replied, nil) || e(assigns[:activity], :replied, nil)
+  #     )
+  #   end
+  # end
+  #
+  # defp reply_in_thread(_socket, _reply_id), do: nil
 
   defp redirect_to_thread_comment(socket, thread_id, comment_id) do
     debug(thread_id, "redirecting to thread")
