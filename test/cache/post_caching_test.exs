@@ -8,7 +8,7 @@ defmodule Bonfire.UI.Posts.PostCachingTest do
   - Authenticated requests are never written to the static cache.
 
   `/post_comments/:id` — CDN-cacheable guest-only route:
-  - Sets cache-control: public with max-age, s-maxage, stale-while-revalidate.
+  - Sets cache-control: public, max-age=0, must-revalidate, s-maxage (browsers always revalidate HTML, the CDN caches it).
   - Does not emit Set-Cookie.
 
   The disk backend permutation block runs the same suite for each supported
@@ -124,9 +124,11 @@ defmodule Bonfire.UI.Posts.PostCachingTest do
 
       assert [cache_control] = get_resp_header(conn, "cache-control")
       assert cache_control =~ "public"
-      assert cache_control =~ "max-age="
+      # HTML: browsers always revalidate, only the CDN keeps a copy
+      assert cache_control =~ "max-age=0"
+      assert cache_control =~ "must-revalidate"
       assert cache_control =~ "s-maxage="
-      assert cache_control =~ "stale-while-revalidate="
+      refute cache_control =~ "stale-while-revalidate"
     end
 
     test "does not emit Set-Cookie", %{post_id: post_id} do
