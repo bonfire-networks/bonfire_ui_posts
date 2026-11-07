@@ -36,6 +36,7 @@ defmodule Bonfire.UI.Posts.PostLive do
        showing_within: :thread,
        object: nil,
        object_not_permitted: nil,
+       remote_interaction_url: nil,
        #  sidebar_widgets: [
        #    users: [
        #      secondary: [
