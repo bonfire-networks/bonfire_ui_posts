@@ -116,7 +116,7 @@ defmodule Bonfire.Posts.LiveHandler do
         {
           :noreply,
           socket
-          |> Bonfire.UI.Common.SmartInput.LiveHandler.reset_input()
+          |> Bonfire.UI.Common.SmartInput.LiveHandler.refused()
           |> assign_error(
             case Errors.error_msg(e) do
               reason when is_binary(reason) and reason != "" ->
