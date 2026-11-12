@@ -45,6 +45,16 @@ defmodule Bonfire.UI.Posts.ScheduledPostTest do
     |> submit_composer(scheduled_content, %{"scheduled_at" => scheduled_value})
     |> wait_async()
     |> refute_has("[data-id=feed] article", text: scheduled_content)
+    |> PhoenixTest.unwrap(fn view ->
+      # the flash is shown by the persistent LiveView the composer lives in
+      flash = view |> composer_view() |> render() |> Floki.parse_document!()
+
+      assert flash |> Floki.find("[data-id=flash]") |> Floki.text() =~ "Scheduled"
+      refute flash |> Floki.find("[data-id=flash]") |> Floki.text() =~ "Posted!"
+      assert Floki.find(flash, "[data-id=flash] a") == []
+
+      render(view)
+    end)
 
     scheduled_post =
       Bonfire.Common.Repo.one!(

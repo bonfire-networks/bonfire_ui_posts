@@ -23,6 +23,25 @@ defmodule Bonfire.UI.Posts.CreatePostTest do
       |> assert_has_or_open_browser("[data-id=feed] article", text: content)
     end
 
+    test "confirms with a Posted! flash that links to the post" do
+      some_account = fake_account!()
+      someone = fake_user!(some_account)
+
+      conn(user: someone, account: some_account)
+      |> visit("/feed/local")
+      |> submit_composer("a post that is shown right away")
+      |> wait_async()
+      |> PhoenixTest.unwrap(fn view ->
+        # the flash is shown by the persistent LiveView the composer lives in
+        flash = view |> composer_view() |> render() |> Floki.parse_document!()
+
+        assert flash |> Floki.find("[data-id=flash]") |> Floki.text() =~ "Posted!"
+        assert flash |> Floki.find("[data-id=flash] a") |> Floki.text() =~ "Show"
+
+        render(view)
+      end)
+    end
+
     test "shows up on my profile timeline" do
       some_account = fake_account!()
       someone = fake_user!(some_account)

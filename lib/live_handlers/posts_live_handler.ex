@@ -77,6 +77,10 @@ defmodule Bonfire.Posts.LiveHandler do
 
       thread_level = length(e(activity, :replied, :path, []))
 
+      # a post scheduled for later has a future-dated id, and its page is hidden until then
+      scheduled? =
+        Bonfire.Common.DatesTimes.compare(object_id, Bonfire.Common.DatesTimes.now()) == :gt
+
       thread_url =
         if thread do
           if is_struct(thread) do
@@ -106,7 +110,11 @@ defmodule Bonfire.Posts.LiveHandler do
         |> Bonfire.UI.Common.SmartInput.LiveHandler.reset_input()
         |> assign_flash(
           :info,
-          "<span>#{l("Posted!")}</span> <a href='#{permalink}' target='_top' class='ml-2 link link-hover font-medium text-primary'>#{l("Show")} →</a>"
+          if scheduled? do
+            "<span>#{l("Scheduled for %{date}", date: Bonfire.Common.DatesTimes.format(object_id))}</span>"
+          else
+            "<span>#{l("Posted!")}</span> <a href='#{permalink}' target='_top' class='ml-2 link link-hover font-medium text-primary'>#{l("Show")} →</a>"
+          end
         )
       }
     else
