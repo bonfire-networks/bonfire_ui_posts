@@ -58,7 +58,11 @@ defmodule Bonfire.UI.Posts.ComposerAudienceEndToEndTest do
     |> PhoenixTest.unwrap(fn view ->
       composer = ComposerHelpers.composer_view(view)
       composer |> element("#define_permissions button[data-role=open_modal]") |> render_click()
-      composer |> element("#customize_boundary_live [data-role=action_toggle_reply]") |> render_click()
+
+      composer
+      |> element("#customize_boundary_live [data-role=action_toggle_reply]")
+      |> render_click()
+
       composer |> element("#customize_boundary_live [data-role=save_boundary]") |> render_click()
       ComposerHelpers.submit_composer(view, text, %{})
     end)
