@@ -112,7 +112,9 @@ defmodule Bonfire.UI.Posts.ComposerPerActionTogglesTest do
     friend = fake_user!()
     other = fake_user!()
     {:ok, circle} = Bonfire.Boundaries.Circles.create(author, %{named: %{name: "friends"}})
-    {:ok, _} = Bonfire.Boundaries.Circles.add_to_circles(friend, circle)
+
+    {:ok, _} =
+      Bonfire.Boundaries.Circles.add_to_circles(friend, circle, skip_boundary_check: true)
 
     post = publish!(author, toggle("reply", false) |> except("reply", circle.id))
     assert Boundaries.can?(friend, :reply, post), "a member of the exception circle may"

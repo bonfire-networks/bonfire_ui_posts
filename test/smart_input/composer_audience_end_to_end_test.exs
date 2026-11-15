@@ -29,7 +29,7 @@ defmodule Bonfire.UI.Posts.ComposerAudienceEndToEndTest do
     member = fake_user!()
     outsider = fake_user!()
     {:ok, circle} = Boundaries.Circles.create(author, "Book club")
-    {:ok, _} = Boundaries.Circles.add_to_circles(member, circle)
+    {:ok, _} = Boundaries.Circles.add_to_circles(member, circle, skip_boundary_check: true)
     text = "for the book club #{System.unique_integer([:positive])}"
 
     conn(user: author, account: account)
